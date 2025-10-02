@@ -1,11 +1,24 @@
 // database.js
-import mysql from 'mysql2';
+import mysql from "mysql2";
 
-// Exportamos la conexión como "db"
+//Configuración de conexión
 export const db = mysql.createPool({
-  host: 'localhost',     // 👈 tu servidor MySQL
-  user: 'root',          // 👈 tu usuario MySQL
-  password: '',          // 👈 pon tu contraseña si tienes
-  database: 'App',       // 👈 debe coincidir con la BD que creaste
-  connectionLimit: 10,   // conexiones máximas en el pool
+  host: "localhost",      
+  user: "root",           
+  password: "",           
+  database: "App",        
+  waitForConnections: true,
+  connectionLimit: 10,    
+  queueLimit: 0
+});
+
+// Probar conexión al iniciar
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("Error al conectar a MySQL:", err.message);
+    process.exit(1); 
+  } else {
+    console.log("Conectado a MySQL correctamente");
+    connection.release();
+  }
 });

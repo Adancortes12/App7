@@ -1,34 +1,19 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
-
-
+import { router } from "expo-router";
 import Constants from "expo-constants";
 
+// Detecta host para web / dispositivo
 const host = (Constants.manifest2?.extra?.expoGo?.debuggerHost ||
               Constants.manifest?.debuggerHost ||
               "localhost").split(":")[0];
 
-const BASE_URL = `http://${host}:8080`;
-
-
-
-type RootStackParamList = {
-  Login: undefined;
-  Home: undefined;
-};
-
-type LoginScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "Login"
->;
+// usa el puerto que pusiste en tu backend (3001 si así lo dejaste)
+const BASE_URL = `http://${host}:3001`;
 
 export default function LoginScreen() {
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleLogin = async () => {
     if (!usuario.trim() || !password) {
@@ -42,22 +27,18 @@ export default function LoginScreen() {
         body: JSON.stringify({ usuario, password }),
       });
 
-      if (resp.status === 401) {
-        return Alert.alert("Error", "Credenciales inválidas");
-      }
-      if (!resp.ok) {
-        return Alert.alert("Error", "No se pudo iniciar sesión");
-      }
+      if (resp.status === 401) return Alert.alert("Error", "Credenciales inválidas");
+      if (!resp.ok) return Alert.alert("Error", "No se pudo iniciar sesión");
 
       const data = await resp.json();
       if (data.success) {
-        // ✅ Redirige a Home
-        navigation.navigate("Home");
+        // expo-router
+        router.replace("/Home"); // o router.push("/Home")
       } else {
         Alert.alert("Error", data.message || "Credenciales inválidas");
       }
     } catch (e) {
-      Alert.alert("Red", "No se pudo conectar con el servidor (¿backend encendido?).");
+      Alert.alert("Red", "No se pudo conectar con el servidor.");
     }
   };
 
